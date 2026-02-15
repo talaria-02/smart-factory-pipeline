@@ -1,0 +1,20 @@
+# docker-compose.yml
+# Week 1: PostgreSQL만 시작. 후속 주차에서 서비스 추가 예정.
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: factory-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: factory2026
+      POSTGRES_DB: factory_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
