@@ -33,12 +33,8 @@ class Sensor:
         self._tick += 1
         
         # 1. 기본값 + 미세 드리프트
-        self._drift += random.gauss(0, 0.001)  # 아주 천천히 변화
+        self._drift += random.gauss(0, 0.01)  # 아주 천천히 변화
         value = self.base + self._drift
-        
-        # 2. 가우시안 노이즈 추가
-        value += random.gauss(0, self.noise)
-        
         # 3. 약간의 주기성 (예: 낮/밤 온도 차이 시뮬레이션)
         cycle = math.sin(self._tick * 2 * math.pi / 3600) * (self.noise * 0.5)
         value += cycle
@@ -47,12 +43,14 @@ class Sensor:
         is_anomaly = False
         if self._anomaly_active:
             value = self.base * self._anomaly_severity
-            value += random.gauss(0, self.noise * 2)  # 이상 시 노이즈 증가
+            value += random.gauss(0, self.noise * 2)  # 이상 가우시안 노이즈 증가
             self._anomaly_remaining -= 1
             is_anomaly = True
             if self._anomaly_remaining <= 0:
                 self._anomaly_active = False
-        
+        else:
+            # 2. 정상 가우시안 노이즈 추가
+            value += random.gauss(0, self.noise)
         # 5. 범위 제한
         value = max(self.min_val, min(self.max_val, value))
         

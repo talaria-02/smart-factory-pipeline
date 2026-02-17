@@ -15,6 +15,13 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
     restart: unless-stopped
-
+  mosquitto:
+    image: eclipse-mosquitto:2
+    container_name: factory-mosquitto
+    ports:
+      - "1883:1883" # MQTT 기본 포트
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+    restart: unless-stopped
 volumes:
   postgres_data:

@@ -9,6 +9,7 @@ import time
 import signal
 import sys
 from datetime import datetime
+import paho.mqtt.client as mqtt
 
 from config import MACHINES, SIMULATION_CONFIG
 from machine import Machine
@@ -20,7 +21,7 @@ def main():
     print(f"   설비 수: {len(MACHINES)}대")
     print(f"   데이터 생성 간격: {SIMULATION_CONFIG['interval_seconds']}초")
     print("=" * 60)
-    print()
+    print() #개요
     
     # 설비 인스턴스 생성
     machines = {}
@@ -40,7 +41,9 @@ def main():
         print("\n\n⏹ 시뮬레이터 종료 중...")
     
     signal.signal(signal.SIGINT, signal_handler)
-    
+    client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
+    client.connect("localhost", 1883)
+
     # 메인 루프
     count = 0
     while running:
@@ -48,7 +51,9 @@ def main():
         
         for machine_id, machine in machines.items():
             data = machine.read_all_sensors()
-            
+            topic = f"factory/{machine_id}/sensors"
+            client.publish(topic, json.dumps(data, ensure_ascii=False))
+
             # 콘솔 출력 (나중에 MQTT Publish로 교체)
             status_emoji = {
                 "RUNNING": "🟢",
